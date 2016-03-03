@@ -3,18 +3,24 @@ package com.watcher.notification;
 import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
-import org.springframework.context.ApplicationContext;
-import org.springframework.context.annotation.AnnotationConfigApplicationContext;
+import org.junit.runner.RunWith;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.ComponentScan;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.test.context.support.AnnotationConfigContextLoader;
 
-import watcher.ApplicationConfigTestNotification;
-
-
+import watcher.ApplicationConfig;
+@RunWith(SpringJUnit4ClassRunner.class)
+@ComponentScan({"com.watcher"})
+@ContextConfiguration(classes = ApplicationConfig.class, loader = AnnotationConfigContextLoader.class)
 public class NotificationByEmailSpringImplTest {
+	
+	@Autowired
+	private NotificationService emailApi;
+	
 	@Test
 	public void testSendNotificationOk() {
-		ApplicationContext appContext = new AnnotationConfigApplicationContext(ApplicationConfigTestNotification.class);
-		
-		NotificationService emailApi = (NotificationService) appContext.getBean("notificationService");
 		String toAddr = "florentina.ardean@gmail.com";
 		String fromAddr = "florentina.ardean@gmail.com";
  
