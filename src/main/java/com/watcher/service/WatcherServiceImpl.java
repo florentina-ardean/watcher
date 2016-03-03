@@ -12,7 +12,9 @@ import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Service;
 
+@Service("watcherService")
 public class WatcherServiceImpl implements WatcherService {
 	@Value("${inputfolder}")
 	public String inputFolder;

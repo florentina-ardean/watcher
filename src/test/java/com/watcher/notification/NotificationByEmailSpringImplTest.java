@@ -8,6 +8,7 @@ import org.springframework.context.annotation.AnnotationConfigApplicationContext
 
 import watcher.ApplicationConfigTestNotification;
 
+
 public class NotificationByEmailSpringImplTest {
 	@Test
 	public void testSendNotificationOk() {

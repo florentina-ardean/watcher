@@ -14,9 +14,11 @@ import java.util.zip.ZipOutputStream;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Service;
 
 import com.watcher.notification.NotificationService;
 
+@Service("fileProcessor")
 public class FileProcessorImpl implements FileProcessor {
 	
 	@Autowired
