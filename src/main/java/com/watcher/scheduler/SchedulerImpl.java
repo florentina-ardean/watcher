@@ -1,8 +1,6 @@
 package com.watcher.scheduler;
 
-import java.nio.file.InvalidPathException;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -39,8 +37,8 @@ public class SchedulerImpl implements Scheduler {
 			public void run() {
 
 				for (int i = filesToBeProcessed.size() - 1; i >= 0; i--) {
-					Path inputFile = getFilePath(filesToBeProcessed.get(i), inputFolder);
-					Path outputFile = getFilePath(filesToBeProcessed.get(i), outputFolder);
+					Path inputFile = fileProcessor.getFilePath(filesToBeProcessed.get(i), inputFolder);
+					Path outputFile = fileProcessor.getFilePath(filesToBeProcessed.get(i), outputFolder);
 					boolean success = fileProcessor.processFile(inputFile,outputFile);
 					if (success) {
 						filesToBeProcessed.remove(i);
@@ -49,16 +47,5 @@ public class SchedulerImpl implements Scheduler {
 			}
 		}, 0, timeToCheckNewFiles, TimeUnit.SECONDS);
 
-	}
-	
-	public Path getFilePath(String fileName, String directory) {
-		Path file = null;
-		
-		try {
-			file = Paths.get(directory, fileName);
-		} catch(InvalidPathException e) {
-			e.printStackTrace();
-		}
-		return file;
 	}
 }

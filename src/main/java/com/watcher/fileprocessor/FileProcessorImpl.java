@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.InvalidPathException;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
@@ -48,7 +49,7 @@ public class FileProcessorImpl implements FileProcessor {
 			deleteFile(inputFile);
 		}
 		
-		if (hasOperationSucceded) {
+		if (!hasOperationSucceded) {
 			notification.sendNotification(mailSubject, mailBody + inputFile.toString());
 		}
 		
@@ -157,5 +158,17 @@ public class FileProcessorImpl implements FileProcessor {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+	}
+	
+	//get file path based on file name and directory
+	public Path getFilePath(String fileName, String directory) {
+		Path file = null;
+		
+		try {
+			file = Paths.get(directory, fileName);
+		} catch(InvalidPathException e) {
+			e.printStackTrace();
+		}
+		return file;
 	}
 }
