@@ -13,50 +13,48 @@ import java.nio.file.StandardCopyOption;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
-import com.watcher.notification.NotificationByEmailImpl;
+import org.springframework.beans.factory.annotation.Autowired;
+
 import com.watcher.notification.NotificationService;
 
-public class FileProcessorImpl {
+public class FileProcessorImpl implements FileProcessor {
+	
+	@Autowired
+	private NotificationService notification;
 
-	private NotificationService notification = new NotificationByEmailImpl();
-
-	public void processFile(String fileName, String inputDirectory, String outputDirectory) {
+	/* (non-Javadoc)
+	 * @see com.watcher.fileprocessor.FileProcessor#processFile(java.lang.String, java.lang.String, java.lang.String)
+	 */
+	public boolean processFile(Path inputFile, Path outputFile) {
 		boolean hasOperationSucceded = false;
 		
-		if (isZipFile(fileName)) {
+		if (isZipFile(inputFile)) {
 			// copy zip file to outputDirectory
-			hasOperationSucceded = copyFile(fileName, inputDirectory, outputDirectory);
+			hasOperationSucceded = copyFile(inputFile, outputFile);
 		} else {
 			// archive file directly to output directory
-			hasOperationSucceded = archiveFile(fileName, inputDirectory, outputDirectory);
+			hasOperationSucceded = archiveFile(inputFile, outputFile);
 		}
 		
 		// if no exception occurs delete initial file
 		if (hasOperationSucceded) {
-			deleteFile(fileName, inputDirectory);
+			deleteFile(inputFile);
 		}
 		
-		if (!hasOperationSucceded) {
-			notification.sendNotification("Process file" + fileName);
+		if (hasOperationSucceded) {
+			notification.sendNotification("Process file" + inputFile.toString());
 		}
+		
+		return hasOperationSucceded;
 	}
 
-	private boolean copyFile(String fileName, String inputDir, String outputDir) {
+	public boolean copyFile(Path inputFile, Path outputFile) {
 		boolean success = false;
-		Path sourceFile = null;
-		Path targetFile = null;
-
 		// copy sourceFile to targetFile location
 		try {
-			sourceFile = Paths.get(inputDir, fileName);
-			targetFile = Paths.get(outputDir, fileName);
-
-			Files.copy(sourceFile, targetFile, StandardCopyOption.REPLACE_EXISTING);
-			
+			Files.copy(inputFile, outputFile, StandardCopyOption.REPLACE_EXISTING);
 			success = true;
-			
-			System.out.println("Copied: " + sourceFile.toString());
-			
+			System.out.println("Copied: " + inputFile.getFileName().toString());
 		} catch (InvalidPathException e) {
 			e.printStackTrace();
 		} catch (IOException e) {
@@ -70,19 +68,23 @@ public class FileProcessorImpl {
 	/**
 	 * Verify if extension is "zip"
 	 */
-	private boolean isZipFile(String fileName) {
+	public boolean isZipFile(Path inputFile) {
+		String fileName = inputFile.getFileName().toString();
 		String extension = fileName.substring(fileName.lastIndexOf(".") + 1, fileName.length());
-		return extension.equals("zip");
+		return extension.equalsIgnoreCase("zip");
 	}
 
 	/**
 	 * Read a file and compress it into a zip file format
 	 * @return 
 	 */
-	private boolean archiveFile(String fileName, String inputDirectory, String outputDirectory) {
-		File file = new File(inputDirectory + "/" + fileName);
-		String fileNameNoExtension = fileName.substring(0, fileName.lastIndexOf("."));
-		String zipFileName = outputDirectory + "/" + fileNameNoExtension + ".zip";
+	public boolean archiveFile (Path inputFile, Path outputFile) {
+		String fileName = inputFile.toString();
+		File file = new File(fileName);
+		
+		String zipfileNameNoExtension = outputFile.toString().substring(0, fileName.lastIndexOf(".") + 1);
+		String zipFileName = zipfileNameNoExtension + ".zip";
+		
 		
 		boolean success = false;
 		FileOutputStream fos = null;
@@ -141,13 +143,10 @@ public class FileProcessorImpl {
 	}
 
 	// delete file
-	private void deleteFile(String fileName, String directory) {
+	public void deleteFile(Path inputFile) {
 		try {
-			Path file = Paths.get(directory, fileName);
-			Files.delete(file);
-			System.out.println("Deleted: " + file.toString());
-		} catch (InvalidPathException e) {
-			e.printStackTrace();
+			Files.delete(inputFile);
+			System.out.println("Deleted: " + inputFile.toString());
 		} catch (IOException e) {
 			e.printStackTrace();
 		}

@@ -9,31 +9,32 @@ import java.nio.file.WatchEvent;
 import java.nio.file.WatchKey;
 import java.nio.file.WatchService;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.CopyOnWriteArrayList;
 
-import com.watcher.fileprocessor.FileProcessorImpl;
+import org.springframework.beans.factory.annotation.Value;
 
 public class WatcherServiceImpl implements WatcherService {
-	FileProcessorImpl fileProcessor = new FileProcessorImpl();
-
-	private final String INPUT_FOLDER = "D:/input";
-	private final String OUTPUT_FOLDER = "D:/output";
-
+	@Value("${inputfolder}")
+	public String inputFolder;
+	
 	/*
 	 * (non-Javadoc)
 	 * 
 	 * @see com.watcher.service.WatcherService#start()
 	 */
-	public void start() {
+	/* (non-Javadoc)
+	 * @see com.watcher.service.WatcherService#start(java.util.concurrent.CopyOnWriteArrayList)
+	 */
+	public void start(CopyOnWriteArrayList<String> filesToBeProcess) {
 		Path myDir = null;
 		try {
 			// define a folder root
-			myDir = Paths.get(INPUT_FOLDER);
+			myDir = Paths.get(inputFolder);
 
 		} catch (InvalidPathException ipe) {
 			System.out.println("InvalidPathException: " + ipe.toString());
 		}
-
+		
 		// creating watch service and register for events
 		try (WatchService watcher = myDir.getFileSystem().newWatchService()) {
 
@@ -41,8 +42,10 @@ public class WatcherServiceImpl implements WatcherService {
 
 			for (;;) {
 
-				WatchKey watckKey = watcher.poll(10, TimeUnit.SECONDS);
+				WatchKey watckKey = watcher.poll();
 
+				try { Thread.sleep(100); } catch (Exception ex) {}
+				
 				// process events
 				if (watckKey != null) { // while (watckKey != null)
 					List<WatchEvent<?>> events = watckKey.pollEvents();
@@ -55,8 +58,8 @@ public class WatcherServiceImpl implements WatcherService {
 							String fileName = event.context().toString();
 							System.out.println("Created: " + fileName);
 
-							// process file
-							fileProcessor.processFile(fileName, INPUT_FOLDER, OUTPUT_FOLDER);
+							// add fileName to list to be process later
+							filesToBeProcess.add(fileName);
 						}
 					}
 					// Reset the key
@@ -67,8 +70,6 @@ public class WatcherServiceImpl implements WatcherService {
 				}
 			}
 		} catch (IOException e) {
-			e.printStackTrace();
-		} catch (InterruptedException e) {
 			e.printStackTrace();
 		} catch (Exception e) {
 			e.printStackTrace();

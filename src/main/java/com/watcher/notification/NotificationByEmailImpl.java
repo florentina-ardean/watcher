@@ -11,26 +11,42 @@ import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
 
+import org.springframework.beans.factory.annotation.Value;
+
 public class NotificationByEmailImpl implements NotificationService {
 	private Properties mailServerProperties;
 	private Session mailSession;
 	private MimeMessage mailMessage;
 
-	private String mailProtocol = "smtp";
-	private String host = "smtp.gmail.com";
+	@Value("${mailProtocol}")
+	private String mailProtocol;
 	
-	private final String MAIL_SMTP_PORT = "mail.smtp.port";
-	private final String MAIL_SMTP_PORT_NUMBER = "587";
+	@Value("${host}")
+	private String host;
 	
-	private final String MAIL_SMTP_AUTH = "mail.smtp.auth";
-	private final String MAIL_SMTP_STARTTLS_ENABLE = "mail.smtp.starttls.enable";
-	private final String TRUE = "true";
+	@Value("${mail_smtp_port}")
+	private String MAIL_SMTP_PORT;
 	
+	@Value("${mail_smtp_port_number}")
+	private String MAIL_SMTP_PORT_NUMBER;
+	
+	@Value("${mail_smtp_auth}")
+	private String MAIL_SMTP_AUTH;
+	
+	@Value("${mail_smtp_starttls_enable}")
+	private String MAIL_SMTP_STARTTLS_ENABLE;
+
+	
+	@Value("${senderAddress}")
 	private String senderAddress = "florentina.ardean@gmail.com";
+	
+	@Value("${senderPassword}")
 	private String senderPassword = "Gandirepozitiva01";
 	
+	@Value("${recipientAddress}")
 	private String recipientAddress = "florentina.ardean@gmail.com";
-
+	
+	
 	/* (non-Javadoc)
 	 * @see com.watcher.notification.NotificationService#sendNotification(java.lang.String)
 	 */
@@ -42,23 +58,20 @@ public class NotificationByEmailImpl implements NotificationService {
 			setMailServerProperties(mailServerProperties);
 
 			// Get mail session
-			System.out.println("Get Mail Session.");
 			mailSession = Session.getDefaultInstance(mailServerProperties, null);
 
 			// and generate mail message
 			mailMessage = generateMailMessage(mailSession, notificationMessage);
 
 			// send mail
-			sendMail(mailSession);
+			sendEmail(mailSession);
 			
 		} catch (SecurityException e) {
-			e.printStackTrace();
-		} catch (Exception e) {
 			e.printStackTrace();
 		}
 	}
 
-	private void sendMail(Session mailSession) {
+	private void sendEmail(Session mailSession) {
 		Transport transport = null;
 		try {
 			transport = mailSession.getTransport(mailProtocol);
@@ -106,11 +119,9 @@ public class NotificationByEmailImpl implements NotificationService {
 
 	private void setMailServerProperties(Properties mailServerProperties) {
 		mailServerProperties.put(MAIL_SMTP_PORT, MAIL_SMTP_PORT_NUMBER);
+		mailServerProperties.put(MAIL_SMTP_AUTH, "true");
+		mailServerProperties.put(MAIL_SMTP_STARTTLS_ENABLE, "true");
 		
-		mailServerProperties.put(MAIL_SMTP_AUTH, TRUE);
-		
-		mailServerProperties.put(MAIL_SMTP_STARTTLS_ENABLE, TRUE);
-
 		System.out.println("Mail Server Properties have been setup successfully.");
 	}
 
