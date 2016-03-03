@@ -30,6 +30,7 @@ public class FileProcessorImpl implements FileProcessor {
 	
 	@Value("${mailbodyfileprocessor}")
 	private String mailBody;
+	
 	/* (non-Javadoc)
 	 * @see com.watcher.fileprocessor.FileProcessor#processFile(java.lang.String, java.lang.String, java.lang.String)
 	 */
@@ -44,12 +45,12 @@ public class FileProcessorImpl implements FileProcessor {
 			hasOperationSucceded = archiveFile(inputFile, outputFile);
 		}
 		
-		// if no exception occurs delete initial file
+		// if file processing was good delete initial file
 		if (hasOperationSucceded) {
 			deleteFile(inputFile);
 		}
 		
-		if (!hasOperationSucceded) {
+		if (hasOperationSucceded) {
 			notification.sendNotification(mailSubject, mailBody + inputFile.toString());
 		}
 		

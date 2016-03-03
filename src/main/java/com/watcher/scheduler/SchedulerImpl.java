@@ -12,6 +12,12 @@ import org.springframework.stereotype.Service;
 
 import com.watcher.fileprocessor.FileProcessor;
 
+
+/**
+ * 
+ * @author florentina.ardean
+ *
+ */
 @Service("scheduler")
 public class SchedulerImpl implements Scheduler {
 	@Value("${inputfolder}")

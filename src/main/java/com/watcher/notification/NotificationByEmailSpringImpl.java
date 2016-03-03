@@ -48,8 +48,7 @@ public class NotificationByEmailSpringImpl implements NotificationService {
 
 	@PostConstruct
 	public void init() {
-		// connect to database
-		// obtain properties
+		// connect and obtain properties
 		JavaMailSenderImpl ms = (JavaMailSenderImpl) mailSender;
 		ms.setHost(host);
 		ms.setPort(port);
@@ -62,8 +61,6 @@ public class NotificationByEmailSpringImpl implements NotificationService {
 		simpleEmailMessage = new SimpleMailMessage();
 		simpleEmailMessage.setFrom(senderAddress);
 		simpleEmailMessage.setTo(recipientAddress);
-		
-		System.out.println("Spring - Mail Properties have been setup successfully.");
 	}
 
 	public boolean sendNotification(String notificationSubject, String notificationMessage) {
