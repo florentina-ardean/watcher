@@ -8,7 +8,6 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.InvalidPathException;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
@@ -54,7 +53,7 @@ public class FileProcessorImpl implements FileProcessor {
 		try {
 			Files.copy(inputFile, outputFile, StandardCopyOption.REPLACE_EXISTING);
 			success = true;
-			System.out.println("Copied: " + inputFile.getFileName().toString());
+			System.out.println("Copied: " + inputFile.toString());
 		} catch (InvalidPathException e) {
 			e.printStackTrace();
 		} catch (IOException e) {
