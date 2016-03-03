@@ -128,4 +128,10 @@ public class NotificationByEmailImpl implements NotificationService {
 		System.out.println("Mail Server Properties have been setup successfully.");
 	}
 
+	@Override
+	public boolean sendNotification(String host, int port, String notificationSubject, String notificationMessage) {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
 }

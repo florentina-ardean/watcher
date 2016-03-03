@@ -17,7 +17,8 @@ public class NotificationByEmailSpringImpl implements NotificationService {
 	@Autowired
 	private MailSender mailSender; // MailSender interface defines a strategy
 									// for sending simple mails
-
+	SimpleMailMessage simpleEmailMessage;
+	
 	@Value("${host}")
 	private String host;
 	
@@ -50,27 +51,44 @@ public class NotificationByEmailSpringImpl implements NotificationService {
 		// connect to database
 		// obtain properties
 		JavaMailSenderImpl ms = (JavaMailSenderImpl) mailSender;
-		
 		ms.setHost(host);
 		ms.setPort(port);
-		
 		ms.setJavaMailProperties(getMailProperties());
-		
 		ms.setUsername(senderAddress);
 		ms.setPassword(senderPassword);
+		
+		//initiate mailMessage
+		//set sender and receiver
+		simpleEmailMessage = new SimpleMailMessage();
+		simpleEmailMessage.setFrom(senderAddress);
+		simpleEmailMessage.setTo(recipientAddress);
+		
 		System.out.println("Spring - Mail Properties have been setup successfully.");
 	}
 
 	public boolean sendNotification(String notificationSubject, String notificationMessage) {
 		boolean success = false;
-		;
-		SimpleMailMessage simpleEmailMessage = new SimpleMailMessage();
-		simpleEmailMessage.setFrom(senderAddress);
-		simpleEmailMessage.setTo(recipientAddress);
+		
 		simpleEmailMessage.setSubject(notificationSubject);
 		simpleEmailMessage.setText(notificationMessage);
 		mailSender.send(simpleEmailMessage);
+		
 		success = true;
+		
+		System.out.println("Spring - Mail sent successfully.");
+
+		return success;
+	}
+	
+	public boolean sendNotification(String host, int port, String notificationSubject, String notificationMessage) {
+		boolean success = false;
+		
+		JavaMailSenderImpl ms = (JavaMailSenderImpl) mailSender;
+		ms.setHost(host);
+		ms.setPort(port);
+		
+		success = sendNotification(notificationSubject, notificationMessage);
+		
 		System.out.println("Spring - Mail sent successfully.");
 
 		return success;
@@ -81,7 +99,6 @@ public class NotificationByEmailSpringImpl implements NotificationService {
 		properties.setProperty(mailProtocol, mailProtocolValue);
 		properties.setProperty(MAIL_SMTP_AUTH, "true");
 		properties.setProperty(MAIL_SMTP_STARTTLS_ENABLE, "true");
-//		properties.setProperty("mail.debug", "false");
 		return properties;
 	}
 

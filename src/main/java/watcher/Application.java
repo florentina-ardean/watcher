@@ -10,7 +10,7 @@ import com.watcher.service.WatcherService;
 
 public class Application {
 	public static CopyOnWriteArrayList<String> filesToProcess = new CopyOnWriteArrayList<String>();
-
+	
 	public static void main(String[] args) {
 
 		ApplicationContext appContext = new AnnotationConfigApplicationContext(ApplicationConfig.class);
