@@ -13,6 +13,7 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 
 import com.watcher.notification.NotificationService;
 
@@ -20,7 +21,12 @@ public class FileProcessorImpl implements FileProcessor {
 	
 	@Autowired
 	private NotificationService notification;
-
+	
+	@Value("${mailsubjectfileprocessor}")
+	private String mailSubject;
+	
+	@Value("${mailbodyfileprocessor}")
+	private String mailBody;
 	/* (non-Javadoc)
 	 * @see com.watcher.fileprocessor.FileProcessor#processFile(java.lang.String, java.lang.String, java.lang.String)
 	 */
@@ -41,7 +47,7 @@ public class FileProcessorImpl implements FileProcessor {
 		}
 		
 		if (hasOperationSucceded) {
-			notification.sendNotification("Process file" + inputFile.toString());
+			notification.sendNotification(mailSubject, mailBody + inputFile.toString());
 		}
 		
 		return hasOperationSucceded;

@@ -18,7 +18,7 @@ public class NotificationByEmailImpl implements NotificationService {
 	private Session mailSession;
 	private MimeMessage mailMessage;
 
-	@Value("${mailProtocol}")
+	@Value("${mailProtocolvalue}")
 	private String mailProtocol;
 	
 	@Value("${host}")
@@ -38,20 +38,20 @@ public class NotificationByEmailImpl implements NotificationService {
 
 	
 	@Value("${senderAddress}")
-	private String senderAddress = "florentina.ardean@gmail.com";
+	private String senderAddress;
 	
 	@Value("${senderPassword}")
-	private String senderPassword = "Gandirepozitiva01";
+	private String senderPassword;
 	
 	@Value("${recipientAddress}")
-	private String recipientAddress = "florentina.ardean@gmail.com";
+	private String recipientAddress;
 	
 	
 	/* (non-Javadoc)
 	 * @see com.watcher.notification.NotificationService#sendNotification(java.lang.String)
 	 */
-	public void sendNotification(String notificationMessage) {
-
+	public boolean sendNotification(String notificationBody, String notificationMessage) {
+		boolean success = false;
 		try {
 			// Set Mail Server Properties.
 			mailServerProperties = System.getProperties();
@@ -61,14 +61,17 @@ public class NotificationByEmailImpl implements NotificationService {
 			mailSession = Session.getDefaultInstance(mailServerProperties, null);
 
 			// and generate mail message
-			mailMessage = generateMailMessage(mailSession, notificationMessage);
+			mailMessage = generateMailMessage(mailSession, notificationBody, notificationMessage);
 
 			// send mail
 			sendEmail(mailSession);
 			
+			success = true;
+			
 		} catch (SecurityException e) {
 			e.printStackTrace();
 		}
+		return success;
 	}
 
 	private void sendEmail(Session mailSession) {
@@ -95,15 +98,15 @@ public class NotificationByEmailImpl implements NotificationService {
 
 	}
 
-	private MimeMessage generateMailMessage(Session mailSession, String notificationMessage) {
+	private MimeMessage generateMailMessage(Session mailSession, String notificationBody, String notificationMessage) {
 		MimeMessage mailMessage = new MimeMessage(mailSession);
 
 		try {
 			InternetAddress adminInternetAddress = new InternetAddress(recipientAddress);
 			mailMessage.addRecipient(Message.RecipientType.TO, adminInternetAddress);
-			mailMessage.setSubject("Important Notification!!!");
+			mailMessage.setSubject(notificationBody);
 
-			String emailBody = notificationMessage + "<br><br> Watcher application";
+			String emailBody = notificationMessage;
 			mailMessage.setContent(emailBody, "text/html");
 
 			System.out.println("Mail Session has been created successfully.");
