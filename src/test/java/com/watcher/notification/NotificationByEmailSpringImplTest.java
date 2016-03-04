@@ -11,6 +11,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
@@ -31,11 +32,25 @@ public class NotificationByEmailSpringImplTest {
 	private NotificationService emailSender;
 
 	private GreenMail testSmtp;
+	
+	@Value("${senderAddress}")
+	private String senderAddress;
+
+	@Value("${recipientAddress}")
+	private String recipientAddress;
+	
+	@Value("${mail.subject.generic}")
+	private String mailSubject;
+	
+	@Value("${mail.body.generic}")
+	private String mailBody;
 
 	@Before
 	public void testSmtpInit() {
 		testSmtp = new GreenMail(ServerSetupTest.SMTP);
 		testSmtp.start();
+		
+		((NotificationByEmailSpringImpl)emailSender).setMailSender("localhost", 3025);
 	}
 
 	@Test
@@ -47,11 +62,18 @@ public class NotificationByEmailSpringImplTest {
 		String notificationMessage = "You got an email. Spring Email test by Admin";
 
 		// send email
-		boolean isEmailSent = emailSender.sendNotification(notificationSubject, notificationMessage);
+		boolean isEmailSent = emailSender.sendNotification(senderAddress, recipientAddress, notificationSubject, notificationMessage);
 
 		assertTrue(isEmailSent);
 	}
 	
+	@Test
+	public void testSendNotificationUseSMTPServer4Params() throws MessagingException {
+		emailSender.sendNotification(senderAddress, recipientAddress, mailSubject, mailBody);
+		Message[] messages = testSmtp.getReceivedMessages();
+		assertEquals(1, messages.length);
+	}
+
 	@Test
 	public void testSendNotificationUseSMTPServer() throws MessagingException {
 		// email subject
@@ -61,22 +83,22 @@ public class NotificationByEmailSpringImplTest {
 		String notificationMessage = "You got an email. Spring Email test by Admin";
 
 		// send email
-		boolean isEmailSent = emailSender.sendNotification("localhost", 3025, notificationSubject, notificationMessage);
+		emailSender.sendNotification(senderAddress, recipientAddress, notificationSubject, notificationMessage);
 
 		Message[] messages = testSmtp.getReceivedMessages();
-        
+
 		assertEquals(1, messages.length);
-        
+
 		assertEquals(notificationSubject, messages[0].getSubject());
-        
+
 		String body = GreenMailUtil.getBody(messages[0]).replaceAll("=\r?\n", "");
-        assertEquals(notificationMessage, body);
-        
-		assertTrue(isEmailSent);
+		assertEquals(notificationMessage, body);
 	}
+
 	
+
 	@After
-    public void cleanup(){
-        testSmtp.stop();
-    }
+	public void cleanup() {
+		testSmtp.stop();
+	}
 }

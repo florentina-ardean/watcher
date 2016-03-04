@@ -46,11 +46,11 @@ public class NotificationByEmailImpl implements NotificationService {
 	@Value("${recipientAddress}")
 	private String recipientAddress;
 	
-	
-	/* (non-Javadoc)
-	 * @see com.watcher.notification.NotificationService#sendNotification(java.lang.String)
-	 */
-	public boolean sendNotification(String notificationBody, String notificationMessage) {
+	@Override
+	public boolean sendNotification(String fromAddress, String toAddress, String notificationSubject,
+			String notificationMessage) {
+		// TODO fix this
+		
 		boolean success = false;
 		try {
 			// Set Mail Server Properties.
@@ -61,7 +61,7 @@ public class NotificationByEmailImpl implements NotificationService {
 			mailSession = Session.getDefaultInstance(mailServerProperties, null);
 
 			// and generate mail message
-			mailMessage = generateMailMessage(mailSession, notificationBody, notificationMessage);
+			mailMessage = generateMailMessage(mailSession, notificationSubject, notificationMessage);
 
 			// send mail
 			sendEmail(mailSession);
@@ -73,7 +73,7 @@ public class NotificationByEmailImpl implements NotificationService {
 		}
 		return success;
 	}
-
+	
 	private void sendEmail(Session mailSession) {
 		Transport transport = null;
 		try {
@@ -127,11 +127,4 @@ public class NotificationByEmailImpl implements NotificationService {
 		
 		System.out.println("Mail Server Properties have been setup successfully.");
 	}
-
-	@Override
-	public boolean sendNotification(String host, int port, String notificationSubject, String notificationMessage) {
-		// TODO Auto-generated method stub
-		return false;
-	}
-
 }

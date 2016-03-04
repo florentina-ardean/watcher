@@ -25,11 +25,23 @@ public class FileProcessorImpl implements FileProcessor {
 	@Autowired
 	private NotificationService notification;
 	
-	@Value("${mailsubjectfileprocessor}")
-	private String mailSubject;
+	@Value("${senderAddress}")
+	private String senderAddress;
+
+	@Value("${recipientAddress}")
+	private String recipientAddress;
 	
-	@Value("${mailbodyfileprocessor}")
-	private String mailBody;
+	@Value("${mail.subject.success}")
+	private String mailSubjectSuccess;
+	
+	@Value("${mail.subject.success}")
+	private String mailBodySuccess;
+	
+	@Value("${mail.subject.error}")
+	private String mailSubjectError;
+	
+	@Value("${mail.body.error}")
+	private String mailBodyError;
 	
 	/* (non-Javadoc)
 	 * @see com.watcher.fileprocessor.FileProcessor#processFile(java.lang.String, java.lang.String, java.lang.String)
@@ -51,7 +63,9 @@ public class FileProcessorImpl implements FileProcessor {
 		}
 		
 		if (hasOperationSucceded) {
-			notification.sendNotification(mailSubject, mailBody + inputFile.toString());
+			notification.sendNotification(senderAddress, recipientAddress, mailSubjectSuccess, mailBodySuccess);
+		} else {
+			notification.sendNotification(senderAddress, recipientAddress, mailSubjectError, mailBodyError + inputFile.toString());
 		}
 		
 		return hasOperationSucceded;

@@ -17,79 +17,84 @@ public class NotificationByEmailSpringImpl implements NotificationService {
 	@Autowired
 	private MailSender mailSender; // MailSender interface defines a strategy
 									// for sending simple mails
-	SimpleMailMessage simpleEmailMessage;
-	
+	//private SimpleMailMessage simpleEmailMessage;
+
 	@Value("${host}")
 	private String host;
-	
+
 	@Value("${mailProtocol}")
 	private String mailProtocol;
-	
+
 	@Value("${mailProtocolValue}")
 	private String mailProtocolValue;
 
 	@Value("${mail_smtp_port_number}")
 	private int port;
-	
+
 	@Value("${mail_smtp_auth}")
 	private String MAIL_SMTP_AUTH;
-	
+
 	@Value("${mail_smtp_starttls_enable}")
 	private String MAIL_SMTP_STARTTLS_ENABLE;
 
 	@Value("${senderAddress}")
-	private String senderAddress;
+	private String mailUsername;
 
 	@Value("${senderPassword}")
-	private String senderPassword;
+	private String mailPassword;
 
-	@Value("${recipientAddress}")
-	private String recipientAddress;
 
 	@PostConstruct
 	public void init() {
 		// connect and obtain properties
-		JavaMailSenderImpl ms = (JavaMailSenderImpl) mailSender;
-		ms.setHost(host);
-		ms.setPort(port);
-		ms.setJavaMailProperties(getMailProperties());
-		ms.setUsername(senderAddress);
-		ms.setPassword(senderPassword);
-		
-		//initiate mailMessage
-		//set sender and receiver
-		simpleEmailMessage = new SimpleMailMessage();
-		simpleEmailMessage.setFrom(senderAddress);
-		simpleEmailMessage.setTo(recipientAddress);
-	}
-
-	public boolean sendNotification(String notificationSubject, String notificationMessage) {
-		boolean success = false;
-		
-		simpleEmailMessage.setSubject(notificationSubject);
-		simpleEmailMessage.setText(notificationMessage);
-		mailSender.send(simpleEmailMessage);
-		
-		success = true;
-		
-		System.out.println("Spring - Mail sent successfully.");
-
-		return success;
+		setMailSender(host, port, mailUsername, mailPassword);
 	}
 	
-	public boolean sendNotification(String host, int port, String notificationSubject, String notificationMessage) {
+	/* (non-Javadoc)
+	 * @see com.watcher.notification.NotificationService#sendNotification(java.lang.String, java.lang.String)
+	 */
+//	@Override
+//	public boolean sendNotification(String notificationSubject, String notificationMessage) {
+//		// TODO Auto-generated method stub
+//		return false;
+//	}
+
+	/* (non-Javadoc)
+	 * @see com.watcher.notification.NotificationService#sendNotification(java.lang.String, java.lang.String, java.lang.String, java.lang.String)
+	 */
+	@Override
+	public boolean sendNotification(String fromAddress, String toAddress, String notificationSubject, String notificationMessage) {
 		boolean success = false;
 		
-		JavaMailSenderImpl ms = (JavaMailSenderImpl) mailSender;
-		ms.setHost(host);
-		ms.setPort(port);
+		SimpleMailMessage simpleEmailMessage = new SimpleMailMessage();
+		setEmailMessage(simpleEmailMessage, fromAddress, toAddress, notificationSubject, notificationMessage);
 		
-		success = sendNotification(notificationSubject, notificationMessage);
-		
+		mailSender.send(simpleEmailMessage);
+
+		success = true;
+
 		System.out.println("Spring - Mail sent successfully.");
 
 		return success;
 	}
+
+	/* (non-Javadoc)
+	 * @see com.watcher.notification.NotificationService#sendNotification(java.lang.String, int, java.lang.String, java.lang.String)
+	 */
+//	@Override
+//	public boolean sendNotification(String host, int port, String notificationSubject, String notificationMessage) {
+//		boolean success = false;
+//
+//		JavaMailSenderImpl ms = (JavaMailSenderImpl) mailSender;
+//		ms.setHost(host);
+//		ms.setPort(port);
+//
+//		success = sendNotification(notificationSubject, notificationMessage);
+//
+//		System.out.println("Spring - Mail sent successfully.");
+//
+//		return success;
+//	}
 
 	private Properties getMailProperties() {
 		Properties properties = new Properties();
@@ -99,4 +104,23 @@ public class NotificationByEmailSpringImpl implements NotificationService {
 		return properties;
 	}
 
+	public void setMailSender(String connectHost, int connectPort, String username, String password) {
+		JavaMailSenderImpl ms = (JavaMailSenderImpl) mailSender;
+		ms.setHost(connectHost);
+		ms.setPort(connectPort);
+		ms.setUsername(username);
+		ms.setPassword(password);
+		ms.setJavaMailProperties(getMailProperties());
+	}
+	
+	public void setMailSender(String connectHost, int connectPort) {
+		setMailSender(connectHost, connectPort, mailUsername, mailPassword);
+	}
+
+	public void setEmailMessage(SimpleMailMessage emailMessage, String fromAddress, String toAddress, String emailSubject, String emailText) {
+		emailMessage.setFrom(fromAddress);
+		emailMessage.setTo(toAddress);
+		emailMessage.setSubject(emailSubject);
+		emailMessage.setText(emailText);
+	}
 }
