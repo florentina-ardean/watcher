@@ -62,11 +62,11 @@ public class FileProcessorImpl implements FileProcessor {
 			deleteFile(inputFile);
 		}
 		
-		if (hasOperationSucceded) {
-			notification.sendNotification(senderAddress, recipientAddress, mailSubjectSuccess, mailBodySuccess);
-		} else {
+		if (!hasOperationSucceded) {
 			notification.sendNotification(senderAddress, recipientAddress, mailSubjectError, mailBodyError + inputFile.toString());
-		}
+		} /*else {
+			notification.sendNotification(senderAddress, recipientAddress, mailSubjectSuccess, mailBodySuccess);
+		}*/
 		
 		return hasOperationSucceded;
 	}
