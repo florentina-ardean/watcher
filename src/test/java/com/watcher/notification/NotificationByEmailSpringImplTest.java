@@ -32,16 +32,16 @@ public class NotificationByEmailSpringImplTest {
 	private NotificationService emailSender;
 
 	private GreenMail testSmtp;
-	
+
 	@Value("${senderAddress}")
 	private String senderAddress;
 
 	@Value("${recipientAddress}")
 	private String recipientAddress;
-	
+
 	@Value("${mail.subject.generic}")
 	private String mailSubject;
-	
+
 	@Value("${mail.body.generic}")
 	private String mailBody;
 
@@ -49,53 +49,83 @@ public class NotificationByEmailSpringImplTest {
 	public void testSmtpInit() {
 		testSmtp = new GreenMail(ServerSetupTest.SMTP);
 		testSmtp.start();
-		
-		((NotificationByEmailSpringImpl)emailSender).setMailSender("localhost", 3025);
+
+		// set host and port number for smtp server
+		((NotificationByEmailSpringImpl) emailSender).setMailSender("localhost", 3025);
 	}
 
 	@Test
-	public void testSendNotificationOk() throws MessagingException {
-		// email subject
+	public void testSendNotificationOk() {
 		String notificationSubject = "This email sent by Notification Spring Test";
-
-		// email body
 		String notificationMessage = "You got an email. Spring Email test by Admin";
-
-		// send email
-		boolean isEmailSent = emailSender.sendNotification(senderAddress, recipientAddress, notificationSubject, notificationMessage);
-
+		boolean isEmailSent = emailSender.sendNotification(senderAddress, recipientAddress, notificationSubject,
+				notificationMessage);
 		assertTrue(isEmailSent);
 	}
-	
+
 	@Test
-	public void testSendNotificationUseSMTPServer4Params() throws MessagingException {
-		emailSender.sendNotification(senderAddress, recipientAddress, mailSubject, mailBody);
+	public void testSendNotificationUseSMTPServer4Params() {
+		boolean isEmailSent = emailSender.sendNotification(senderAddress, recipientAddress, mailSubject, mailBody);
+		// check messages with GreenMail server
 		Message[] messages = testSmtp.getReceivedMessages();
 		assertEquals(1, messages.length);
+		assertTrue(isEmailSent);
 	}
 
 	@Test
 	public void testSendNotificationUseSMTPServer() throws MessagingException {
-		// email subject
-		String notificationSubject = "This email sent by Notification Spring Test";
+		boolean isEmailSent = emailSender.sendNotification(senderAddress, recipientAddress, mailSubject, mailBody);
 
-		// email body
-		String notificationMessage = "You got an email. Spring Email test by Admin";
-
-		// send email
-		emailSender.sendNotification(senderAddress, recipientAddress, notificationSubject, notificationMessage);
-
+		// check messages with GreenMail server
 		Message[] messages = testSmtp.getReceivedMessages();
-
 		assertEquals(1, messages.length);
-
-		assertEquals(notificationSubject, messages[0].getSubject());
-
+		assertEquals(mailSubject, messages[0].getSubject());
 		String body = GreenMailUtil.getBody(messages[0]).replaceAll("=\r?\n", "");
-		assertEquals(notificationMessage, body);
+		assertEquals(mailBody, body);
+		assertTrue(isEmailSent);
 	}
 
+	@Test
+	public void testSendNotificationUseSMTPServerNullSender() {
+		boolean isEmailSent = emailSender.sendNotification(null, recipientAddress, mailSubject, mailBody);
+		assertTrue(isEmailSent);
+		
+		// check messages with GreenMail server
+		Message[] messages = testSmtp.getReceivedMessages();
+		assertEquals(1, messages.length);
+	}
 	
+	@Test
+	public void testSendNotificationUseSMTPServerNullRecipient() {
+		boolean isEmailSent = emailSender.sendNotification(senderAddress, null, mailSubject, mailBody);
+		assertEquals(false, isEmailSent);
+		
+		// check messages with GreenMail server
+		Message[] messages = testSmtp.getReceivedMessages();
+		assertEquals(0, messages.length);
+	}
+	
+	
+	@Test
+	public void testSendNotificationUseSMTPServerNullSubject() {
+		boolean isEmailSent = emailSender.sendNotification(senderAddress, recipientAddress, null, mailBody);
+		assertTrue(isEmailSent);
+		
+		// check messages with GreenMail server
+		Message[] messages = testSmtp.getReceivedMessages();
+		assertEquals(1, messages.length);
+
+	}
+	
+	@Test
+	public void testSendNotificationUseSMTPServerNullBody() {
+		boolean isEmailSent = emailSender.sendNotification(senderAddress, recipientAddress, mailSubject, null);
+		assertEquals(false, isEmailSent);
+		
+		// check messages with GreenMail server
+		Message[] messages = testSmtp.getReceivedMessages();
+		assertEquals(0, messages.length);
+	}
 
 	@After
 	public void cleanup() {

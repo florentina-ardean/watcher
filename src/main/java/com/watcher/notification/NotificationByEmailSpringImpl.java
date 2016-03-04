@@ -17,7 +17,7 @@ public class NotificationByEmailSpringImpl implements NotificationService {
 	@Autowired
 	private MailSender mailSender; // MailSender interface defines a strategy
 									// for sending simple mails
-	//private SimpleMailMessage simpleEmailMessage;
+	// private SimpleMailMessage simpleEmailMessage;
 
 	@Value("${host}")
 	private String host;
@@ -43,58 +43,41 @@ public class NotificationByEmailSpringImpl implements NotificationService {
 	@Value("${senderPassword}")
 	private String mailPassword;
 
-
 	@PostConstruct
 	public void init() {
 		// connect and obtain properties
 		setMailSender(host, port, mailUsername, mailPassword);
 	}
-	
-	/* (non-Javadoc)
-	 * @see com.watcher.notification.NotificationService#sendNotification(java.lang.String, java.lang.String)
-	 */
-//	@Override
-//	public boolean sendNotification(String notificationSubject, String notificationMessage) {
-//		// TODO Auto-generated method stub
-//		return false;
-//	}
 
-	/* (non-Javadoc)
-	 * @see com.watcher.notification.NotificationService#sendNotification(java.lang.String, java.lang.String, java.lang.String, java.lang.String)
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * com.watcher.notification.NotificationService#sendNotification(java.lang.
+	 * String, java.lang.String, java.lang.String, java.lang.String)
 	 */
 	@Override
-	public boolean sendNotification(String fromAddress, String toAddress, String notificationSubject, String notificationMessage) {
+	public boolean sendNotification(String fromAddress, String toAddress, String notificationSubject,
+			String notificationMessage) {
 		boolean success = false;
-		
+
 		SimpleMailMessage simpleEmailMessage = new SimpleMailMessage();
-		setEmailMessage(simpleEmailMessage, fromAddress, toAddress, notificationSubject, notificationMessage);
-		
-		mailSender.send(simpleEmailMessage);
 
-		success = true;
-
-		System.out.println("Spring - Mail sent successfully.");
+		if (toAddress != null && notificationMessage != null) {
+			setEmailMessage(simpleEmailMessage, fromAddress, toAddress, notificationSubject, notificationMessage);
+			mailSender.send(simpleEmailMessage);
+			success = true;
+			System.out.println("Spring - Mail sent successfully.");
+		} else if (toAddress == null) {
+			success = false;
+			System.out.println("Spring - Mail not send receiver address is null.");
+		} else if (notificationMessage == null) {
+			success = false;
+			System.out.println("Spring - Mail not send notification message is null.");
+		}
 
 		return success;
 	}
-
-	/* (non-Javadoc)
-	 * @see com.watcher.notification.NotificationService#sendNotification(java.lang.String, int, java.lang.String, java.lang.String)
-	 */
-//	@Override
-//	public boolean sendNotification(String host, int port, String notificationSubject, String notificationMessage) {
-//		boolean success = false;
-//
-//		JavaMailSenderImpl ms = (JavaMailSenderImpl) mailSender;
-//		ms.setHost(host);
-//		ms.setPort(port);
-//
-//		success = sendNotification(notificationSubject, notificationMessage);
-//
-//		System.out.println("Spring - Mail sent successfully.");
-//
-//		return success;
-//	}
 
 	private Properties getMailProperties() {
 		Properties properties = new Properties();
@@ -112,12 +95,13 @@ public class NotificationByEmailSpringImpl implements NotificationService {
 		ms.setPassword(password);
 		ms.setJavaMailProperties(getMailProperties());
 	}
-	
+
 	public void setMailSender(String connectHost, int connectPort) {
 		setMailSender(connectHost, connectPort, mailUsername, mailPassword);
 	}
 
-	public void setEmailMessage(SimpleMailMessage emailMessage, String fromAddress, String toAddress, String emailSubject, String emailText) {
+	public void setEmailMessage(SimpleMailMessage emailMessage, String fromAddress, String toAddress,
+			String emailSubject, String emailText) {
 		emailMessage.setFrom(fromAddress);
 		emailMessage.setTo(toAddress);
 		emailMessage.setSubject(emailSubject);
